@@ -96,15 +96,15 @@ function loadPlanetTexture(texture, radius, widthSegments, heightSegments) {
 }
 
 const planets = [
-  { mesh: loadPlanetTexture("./img/8k_sun.jpg", 5, 100, 100), speed: 0 },
-  { mesh: loadPlanetTexture("./img/8k_mercury.jpg", 1 , 100, 100), speed: 0.4 },
-  { mesh: loadPlanetTexture("./img/8k_venus_surface.jpg", 2.3, 100, 100), speed: 0.00015 },
-  { mesh: loadPlanetTexture("./img/earth_day_4096.jpg", 2.3, 100, 100), speed: 0.0001 },
-  { mesh: loadPlanetTexture("./img/8k_mars.jpg",  2, 100, 100), speed: 0.0008 },
-  { mesh: loadPlanetTexture("./img/8k_jupiter.jpg", 4, 100, 100), speed: 0.0002 },
-  { mesh: loadPlanetTexture("./img/8k_saturn.jpg", 4, 100, 100), speed: 0.00015 },
-  { mesh: loadPlanetTexture("./img/2k_uranus.jpg", 4, 100, 100), speed: 0.00007 },
-  { mesh: loadPlanetTexture("./img/2k_neptune.jpg", 8, 100, 100), speed: 0.000005 },
+  { mesh: loadPlanetTexture("./8k_sun.jpg", 5, 100, 100), speed: 0 },
+  { mesh: loadPlanetTexture("./8k_mercury.jpg", 1 , 100, 100), speed: 0.4 },
+  { mesh: loadPlanetTexture("./8k_venus_surface.jpg", 2.3, 100, 100), speed: 0.00015 },
+  { mesh: loadPlanetTexture("./earth_day_4096.jpg", 2.3, 100, 100), speed: 0.0001 },
+  { mesh: loadPlanetTexture("./8k_mars.jpg",  2, 100, 100), speed: 0.0008 },
+  { mesh: loadPlanetTexture("./8k_jupiter.jpg", 4, 100, 100), speed: 0.0002 },
+  { mesh: loadPlanetTexture("./8k_saturn.jpg", 4, 100, 100), speed: 0.00015 },
+  { mesh: loadPlanetTexture("./2k_uranus.jpg", 4, 100, 100), speed: 0.00007 },
+  { mesh: loadPlanetTexture("./2k_neptune.jpg", 8, 100, 100), speed: 0.000005 },
 ];
 
 planets.forEach(p => scene.add(p.mesh));
@@ -277,4 +277,5 @@ window.addEventListener('resize', () => {
 // }
 </script>
 </body>
+
 </html>
