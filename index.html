@@ -45,6 +45,9 @@
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0";
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js";
 import { CSS2DRenderer, CSS2DObject } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/renderers/CSS2DRenderer.js";
+import { EffectComposer } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 // --- Scene & Camera ---
 const scene = new THREE.Scene();
@@ -72,6 +75,10 @@ controls.enableDamping = true;
 // --- Lights ---
 scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 scene.add(new THREE.PointLight(0xffffff, 2, 3000));
+
+
+
+
 
 // --- Ellipse Ring ---
 function createEllipseRing(radiusX, radiusY, centrex=0, segments=200) {
@@ -129,10 +136,31 @@ const planetDays = {
   uranus: 0.718,
   neptune: 0.671
 };
+const textureLoader1 = new THREE.TextureLoader();
+const fireTexture = textureLoader1.load('./6.jpg');
+fireTexture.wrapS = fireTexture.wrapT = THREE.RepeatWrapping;
+// Sun Material
+const sunMaterial = new THREE.MeshStandardMaterial({
+  map: fireTexture,
+  emissive: new THREE.Color(0xffaa00),
+  emissiveMap: fireTexture,
+  emissiveIntensity: 2
+});
+
+// Sun Mesh
+const sunGeometry = new THREE.SphereGeometry(5, 18, 18);
+const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+scene.add(sunMesh);
+const sunLight = new THREE.PointLight(0xffddaa, 10, 1000);
+sunLight.position.copy(sunMesh.position);
+scene.add(sunLight);
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85));
 
 // --- Planets array ---
 const planets = [
-  { mesh: loadPlanetTexture("./8k_sun.jpg", 5), key: "sun" },
+  { mesh: loadPlanetTexture("./8k_sun.jpg", 4.9), key: "sun" },
   { mesh: loadPlanetTexture("./8k_mercury.jpg", 1), key: "mercury" },
   { mesh: loadPlanetTexture("./8k_venus_surface.jpg", 2.3), key: "venus" },
   { mesh: loadPlanetTexture("./earth_day_4096.jpg", 2.3), key: "earth" },
@@ -183,8 +211,12 @@ function createStone(radius, periodRatio, color=0xaaaaaa, size=0.2) {
   scene.add(m);
   stones.push({ mesh: m, angle: theta, radius, periodRatio });
 }
-for(let i=0;i<1300;i++) createStone(50 + Math.random()*10, 4 + Math.random()*2);
-for(let i=0;i<1000;i++) createStone(710 + Math.random()*40, 200 + Math.random()*100, 0x8888ff, 0.25);
+for(let i=0;i<100;i++) createStone(50 + Math.random()*10, 4 + Math.random()*2);
+for(let i=0;i<50;i++) createStone(63 + Math.random()*10, 4 + Math.random()*2);
+for(let i=0;i<50;i++) createStone(65 + Math.random()*10, 4 + Math.random()*2);
+for(let i=0;i<900;i++) createStone(55 + Math.random()*10, 4 + Math.random()*2);
+for(let i=0;i<100;i++) createStone(60 + Math.random()*10, 4 + Math.random()*2);
+for(let i=0;i<10000;i++) createStone(710 + Math.random()*40, 200 + Math.random()*100, 0x8888ff, 0.25);
 
 // --- Angles ---
 const angles = new Array(planets.length).fill(0);
@@ -202,6 +234,8 @@ scaleSlider.addEventListener("input", e => {
 function animate(){
   requestAnimationFrame(animate);
 
+    // fireTexture.offset.x += 0.001;
+  fireTexture.offset.y += 0.001;
   // Planet orbit + spin
   for(let i=1;i<planets.length;i++){
     const key = planets[i].key;
