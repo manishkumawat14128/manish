@@ -40,6 +40,9 @@
   <label>🌍 Earth Orbital Period (seconds): <span id="scaleValue">1000</span></label><br>
   <input id="scaleSlider" type="range" min="0.1" max="10000" value="1000" step="1">
 </div>
+<div id="colorContainer" style="position:absolute; top:70px; left:50%; transform:translateX(-50%); color:white; font-family:sans-serif; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px;">
+  <label>Background Color: <input type="color" id="bgColorPicker" value="#000011"></label>
+</div>
 
 <script type="module">
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0";
@@ -52,7 +55,7 @@ import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.129.0/examples/
 // --- Scene & Camera ---
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 10000);
-camera.position.set(0, 150, 400);
+camera.position.set(50,10,0);
 
 // --- Renderer ---
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -77,6 +80,18 @@ scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 scene.add(new THREE.PointLight(0xffffff, 2, 3000));
 
 
+const starGeometry = new THREE.BufferGeometry();
+const starPositions = [];
+for (let i = 0; i < 1000; i++) {
+  const x = (Math.random() - .5) * 8000;
+  const y = (Math.random() - 0.5) * 9000;
+  const z = (Math.random() - 0.5) * 8000;
+  starPositions.push(x, y, z);
+}
+starGeometry.setAttribute("position", new THREE.Float32BufferAttribute(starPositions, 3));
+const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 2 });
+const stars = new THREE.Points(starGeometry, starMaterial);
+scene.add(stars);
 
 
 
@@ -109,7 +124,14 @@ orbitsData.forEach(o => scene.add(createEllipseRing(o.a,o.b,o.cx)));
 const textureLoader = new THREE.TextureLoader();
 function loadPlanetTexture(texture, radius) {
   const geo = new THREE.SphereGeometry(radius, 32, 32);
-  const mat = new THREE.MeshStandardMaterial({ map: textureLoader.load(texture) });
+  const mat = new THREE.MeshStandardMaterial({ 
+    map: textureLoader.load(texture),
+    roughness: 1,
+    metalness: 0,
+    bumpMap: textureLoader.load(texture),
+    bumpScale: 0.05
+
+   });
   return new THREE.Mesh(geo, mat);
 }
 
@@ -192,7 +214,7 @@ planets.forEach(p => {
   div.innerText = p.key.charAt(0).toUpperCase() + p.key.slice(1);
 
   const label = new CSS2DObject(div);
-  label.position.set(0, p.mesh.geometry.parameters.radius + 0.5, 0); 
+  label.position.set(0, (p.mesh.geometry.parameters.radius )+1.5, 0); 
   p.mesh.add(label);
 
   p.labelDiv = div;
@@ -216,7 +238,9 @@ for(let i=0;i<50;i++) createStone(63 + Math.random()*10, 4 + Math.random()*2);
 for(let i=0;i<50;i++) createStone(65 + Math.random()*10, 4 + Math.random()*2);
 for(let i=0;i<900;i++) createStone(55 + Math.random()*10, 4 + Math.random()*2);
 for(let i=0;i<100;i++) createStone(60 + Math.random()*10, 4 + Math.random()*2);
-for(let i=0;i<10000;i++) createStone(710 + Math.random()*40, 200 + Math.random()*100, 0x8888ff, 0.25);
+for(let i=0;i<10000;i++) createStone(730 + Math.random()*40, 200 + Math.random()*100, 0x8888ff, 0.25);
+// for(let i=0;i<10000;i++) createStone(710 + Math.random()*40, 200 + Math.random()*100, 0x8888ff, 0.25);
+// for(let i=0;i<10000;i++) createStone(710 + Math.random()*40, 200 + Math.random()*100, 0x8888ff, 0.25);
 
 // --- Angles ---
 const angles = new Array(planets.length).fill(0);
@@ -229,6 +253,32 @@ scaleSlider.addEventListener("input", e => {
   periodScale = parseFloat(e.target.value);
   scaleValue.innerText = periodScale;
 });
+
+
+const bgGeometry = new THREE.SphereGeometry(10000, 64, 64);
+const bgMaterial = new THREE.MeshBasicMaterial({
+  color: 0x050505,     // base dark blue
+  // color: 0x88ccff,     // base dark blue
+  side: THREE.BackSide, // render inside of sphere
+});
+document.getElementById("bgColorPicker").addEventListener("input", e=>{
+  const color = new THREE.Color(e.target.value);
+  bgMaterial.color = color;
+  scene.fog.color = color;
+  renderer.setClearColor(color);
+});
+const background = new THREE.Mesh(bgGeometry, bgMaterial);
+scene.add(background);
+scene.fog = new THREE.FogExp2(0x000011, 0.00015);
+renderer.setClearColor(new THREE.Color(0x000010)); // dark top
+
+// const bloomPass = new UnrealBloomPass(
+//   new THREE.Vector2(window.innerWidth, window.innerHeight),
+//   1.5,  // strength
+//   0.4,  // radius
+//   0.85  // threshold
+// );
+// composer.addPass(bloomPass);
 
 // --- Animation loop ---
 function animate(){
@@ -250,6 +300,9 @@ function animate(){
       planets[i].mesh.rotation.y += rotationsPerOrbit * speed;
     }
   }
+
+controls.minDistance = 5;   // how close camera can zoom in
+controls.maxDistance = 1100;  // how far camera can zoom out
 
   // Asteroids
   stones.forEach(s=>{
@@ -293,4 +346,3 @@ window.addEventListener('resize', ()=>{
 </script>
 </body>
 </html>
-
